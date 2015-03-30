@@ -26,31 +26,70 @@ The purpose of this plugin is to provide an in-app-browser that can also be conf
 
 This plugin launches an in-app web view on top the existing [CordovaWebView](https://github.com/apache/cordova-android/blob/master/framework/src/org/apache/cordova/CordovaWebView.java) by calling `cordova.ThemeableBrowser.open()`.
 
-    // Uses stub button image that's in fact, default. Just for example.
-    var ref = cordova.ThemeableBrowser.open('http://apache.org', '_blank', {
-        backButtonCanClose: true,
-        hideForwardButton: true,
-        toolbarColor: '#e1e1e1ff',
-        titleColor: '#000000ff',
-        statusbarColor: '#ffffffff',
-        navButtonAlign: 'left',
-        closeButtonAlign: 'right',
-        menuButtonAlign: 'right',
-        titleStaticText: 'Hello World!',
-        backButtonImage: 'themeablebrowser_stub_back',
-        backButtonPressedImage: 'themeablebrowser_stub_back_highlight',
-        menuTitle: 'Test',
-        menuCancel: 'Cancel',
-        menuItems: [
+    // Keep in mind that you must add your own images to native resource.
+    // Images below are for sample only. They are not imported by this plugin.
+    cordova.ThemeableBrowser.open('http://apache.org', '_blank', {
+        statusbar: {
+            color: '#ffffffff'
+        },
+        toolbar: {
+            height: 44,
+            color: '#f0f0f0ff'
+        },
+        title: {
+            color: '#003264ff',
+            showPageTitle: true
+        },
+        backButton: {
+            image: 'back',
+            imagePressed: 'back_pressed',
+            align: 'left',
+            event: 'backPressed'
+        },
+        forwardButton: {
+            image: 'forward',
+            imagePressed: 'forward_pressed',
+            align: 'left',
+            event: 'forwardPressed'
+        },
+        closeButton: {
+            image: 'close',
+            imagePressed: 'close_pressed',
+            align: 'left',
+            event: 'closePressed'
+        },
+        customButtons: [
             {
-                event: 'hello',
-                label: 'Hello World!'
-            },
-            {
-                event: 'test',
-                label: 'Test!'
+                image: 'share',
+                imagePressed: 'share_pressed',
+                align: 'right',
+                event: 'sharePressed'
             }
-        ]
+        ],
+        menu: {
+            image: 'menu',
+            imagePressed: 'menu_pressed',
+            title: 'Test',
+            cancel: 'Cancel',
+            align: 'right',
+            items: [
+                {
+                    event: 'helloPressed',
+                    label: 'Hello World!'
+                },
+                {
+                    event: 'testPressed',
+                    label: 'Test!'
+                }
+            ]
+        },
+        backButtonCanClose: true
+    }).addEventListener('backPressed', function(e) {
+        alert('back pressed');
+    }).addEventListener('helloPressed', function(e) {
+        alert('hello pressed');
+    }).addEventListener('sharePressed', function(e) {
+        alert(e.url);
     });
 
 ![iOS Sample](doc/images/ios_sample_01.png)
@@ -67,49 +106,62 @@ Installation
 Additional Properties
 ---------------------
 
-In addition to InAppBrowser's properties, following properties were added to fulfill this plugin's purpose.
+In addition to InAppBrowser's properties, following properties were added to fulfill this plugin's purpose in a nested JSON object.
 
-+ Toolbar and status bar
-    + `statusbarColor` sets status bar color for iOS 7+ in RGBA web hex format. eg. `#fff0f0ff`. Applicable only to iOS 7+. iOS only.
-    + `toolbarHeight` sets height of toolbar.
-    + `toolbarColor` sets browser toolbar color in RGBA web hex format. eg. `#fff0f0ff`. Also see `toolbarImage`.
-    + `toolbarImage` sets an image as browser toolbar background in titled mode. This property references to a **native** image resource, therefore it is platform dependent.
-    + `toolbarImagePortrait` sets an image for browser toolbar background but only in portrait mode. This property will be overridden by `toolbarImage` if given. This is an iOS only property and references to **native** image resource.
-    + `toolbarImageLandscape` sets an image for browser toolbar background but only in landscape mode. This property will be overridden by `toolbarImage` if given. This is an iOS only property and references to **native** image resource.
-+ Buttons
-    + `backButtonImage` sets image for back button. This property references to a **native** image resource, therefore it is platform dependent.
-    + `backButtonPressedImage` sets image for back button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
-    + `forwardButtonImage` sets image for forward button. This property references to a **native** image resource, therefore it is platform dependent.
-    + `forwardButtonPressedImage` sets image for forward button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
-    + `closeButtonImage` sets image for close button. This property references to a **native** image resource, therefore it is platform dependent.
-    + `closeButtonPressedImage` sets image for close button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
-    + `menuButtonImage` sets image for menu button. Note that menu button is only shown when `menuItems` is given. This property references to a **native** image resource, therefore it is platform dependent.
-    + `menuButtonPressedImage` sets image for menu button in its pressed state. Note that menu button is only shown when `menuItems` is given. This property references to a **native** image resource, therefore it is platform dependent.
-+ Title
-    + `titleColor` sets title text color in RGBA web hex format. eg. `#fff0f0ff`
-    + `titleStaticText` sets static text for title. Note that by default title shows the title of the currently shown web page. Also see `hideTitle`.
-+ Menu
-    + `menuItems` creates a list of menu items for user to choose when menu button is clicked. It must follow the following format `[{event: 'e', label: 'l'}]`. When a menu item is pressed, you will get a custom event specified by the `event` property of the item. Within the received event object, you will also be given the following properties: `url`, which is the current URL in the web view, and `menuIndex`, which is an integer that references to the index of menu item in the given list.
-    + `menuTitle` sets menu title when menu button is clicked. iOS only.
-    + `menuCancel` sets menu cancel button text. iOS only.
-+ Alignment
-    + `closeButtonAlign` aligns close button to either `left` or `right`. Default to `left`.
-    + `navButtonAlign` aligns back and forward buttons to either `left` or `right`. Default to `left`.
-    + `menuButtonAlign` aligns menu button to either `left` or `right`. Default to `right`. Note that menu button is only shown when `menuItems` is given.
-+ Visibility
-    + `hideTitle` hides title when set to `true`.
-    + `hideCloseButton` hides close button when set to `true`.
-    + `hideBackButton` hides back button when set to `true`.
-    + `hideForwardButton` hides forward when set to `true`.
-+ Others
-    + `backButtonCanClose` allows back button to close browser when there's no more to go back. Otherwise, back button will be disabled.
++ `statusbar` applicable to only iOS 7+.
+    + `color` sets status bar color for iOS 7+ in RGBA web hex format. eg. `#fff0f0ff`. Applicable to only iOS 7+.
++ `toolbar`
+    + `height` sets height of toolbar.
+    + `color` sets browser toolbar color in RGBA web hex format. eg. `#fff0f0ff`. Also see `image`.
+    + `image` sets an image as browser toolbar background in titled mode. This property references to a **native** image resource, therefore it is platform dependent.
+    + `imagePortrait` sets an image for browser toolbar background but only in portrait mode. This property will be overridden by `image` if given. This is an iOS only property and references to **native** image resource.
+    + `imageLandscape` sets an image for browser toolbar background but only in landscape mode. This property will be overridden by `image` if given. This is an iOS only property and references to **native** image resource.
++ `title`
+    + `color` sets title text color in RGBA web hex format. Default to black. eg. `#fff0f0ff`
+    + `staticText` sets static text for title. This property overrides `showPageTitle` (see below).
+    + `showPageTitle` when set to true, title of the current web page will be shown.
++ `backButton`
+    + `image` sets image for back button. This property references to a **native** image resource, therefore it is platform dependent.
+    + `imagePressed` sets image for back button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
+    + `align` aligns back button to either `left` or `right`. Default to `left`.
+    + `event` raises an custom event with given text as event name when back button is pressed. Optional.
++ `forwardButton`
+    + `image` sets image for forward button. This property references to a **native** image resource, therefore it is platform dependent.
+    + `imagePressed` sets image for forward button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
+    + `align` aligns forward button to either `left` or `right`. Default to `left`.
+    + `event` raises an custom event with given text as event name when forward button is pressed. Optional.
++ `closeButton`
+    + `image` sets image for close button. This property references to a **native** image resource, therefore it is platform dependent.
+    + `imagePressed` sets image for close button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
+    + `align` aligns close button to either `left` or `right`. Default to `left`.
+    + `event` raises an custom event with given text as event name when close button is pressed. Optional.
++ `menu`
+    + `title` sets menu title when menu button is clicked. iOS only.
+    + `cancel` sets menu cancel button text. iOS only.
+    + `image` sets image for menu button. This property references to a **native** image resource, therefore it is platform dependent.
+    + `imagePressed` sets image for menu button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
+    + `event` raises an custom event with given text as event name when menu button is pressed. Optional.
+    + `align` aligns menu button to either `left` or `right`. Default to `left`.
+    + `items` is a list of items to be shown when menu is open
+        + `event` defines the event name that will be raised when this menu item is clicked. The callbacks to menu events will receive an event object that contains the following properties: `url` is the current URL shown in browser and `index` is the index of the selected item in `items`.
+        + `label` defines the menu item label text.
++ `customButtons` is a list of objects that will be inserted into toolbar when given.
+    + `image` sets image for custom button. This property references to a **native** image resource, therefore it is platform dependent.
+    + `imagePressed` sets image for custom button in its pressed state. This property references to a **native** image resource, therefore it is platform dependent.
+    + `align` aligns custom button to either `left` or `right`. Default to `left`.
+    + `event` raises an custom event with given text as event name when custom button is pressed. The callbacks to custom button events will receive an event object that contains the following properties: `url` is the current URL shown in browser and `index` is the index of the selected button in `customButtons`.
++ `backButtonCanClose` allows back button to close browser when there's no more to go back. Otherwise, back button will be disabled.
 
 One thing to note is that all image resources reference to **native** resource bundle. So all images need to be imported to native project first. In case of Android, the image name will be looked up under `R.drawable`. eg. If image name is `hello_world`, `R.drawable.hello_world` will be referenced.
 
-You may have noticed that one of the major features that ThemedBrowser added is an optional menu, which you can use to prompt user to make a simple choice from a list of items.
+You may have noticed that ThemedBrowser added an optional menu as well as custom buttons, which you can utilize to respond to some simply user actions.
 
 FAQ
 ---
+
+### I just installed this plugin, how come it just shows a blank toolbar?
+
+The purpose of this plugin is to allow **you** style the in app browser the way you want. Isn't that that why you installed this plugin in the first place? Hence it does not come with any defaults. Every UI element needs to be styled by you. This also avoids polluting your resouce bundle with default images.
 
 ### Why does my menu on Android look ugly?
 
@@ -140,43 +192,69 @@ Migration
 
 This plugin is **not** a drop-in replacement for InAppBrowser. The biggest change that was made from InAppBrowser, which caused it to be no longer compatible with InAppBrowser's API is that `options` parameter now accepts a JavaScript object instead of string.
 
-    var ref = cordova.ThemeableBrowser.open('http://apache.org', '_blank', {
-        titleStaticText: 'Hello World!',
-        menuItems: [
+    cordova.ThemeableBrowser.open('http://apache.org', '_blank', {
+        customButtons: [
             {
-                event: 'hello',
-                label: 'Hello World!'
+                image: 'share',
+                imagePressed: 'share_pressed',
+                align: 'right',
+                event: 'sharePressed'
             }
-        ]
-    });
-    ref.addEventListener('hello', function(event) {
-        alert(event.url);
+        ],
+        menu: {
+            image: 'menu',
+            imagePressed: 'menu_pressed',
+            items: [
+                {
+                    event: 'helloPressed',
+                    label: 'Hello World!'
+                },
+                {
+                    event: 'testPressed',
+                    label: 'Test!'
+                }
+            ]
+        }
     });
 
-As you can see from above, this allows `menuItems` to have more robust and readable definition.
+As you can see from above, this allows `menu` to have more robust and readable definition.
 
 Furthermore, the object returned by `open` always returns its own instance allowing chaining of methods. Obviously, this breaks the immitation of the `window.open()`, however it's an optional feature that you can choose not to use if you want to stay loyal to the original.
 
     cordova.ThemeableBrowser.open('http://apache.org', '_blank', {
-        titleStaticText: 'Hello World!',
-        menuItems: [
+        customButtons: [
             {
-                event: 'hello',
-                label: 'Hello World!'
-            },
-            {
-                event: 'test',
-                label: 'Test!'
+                image: 'share',
+                imagePressed: 'share_pressed',
+                align: 'right',
+                event: 'sharePressed'
             }
-        ]
-    }).addEventListener('hello', function(event) {
+        ],
+        menu: {
+            image: 'menu',
+            imagePressed: 'menu_pressed',
+            items: [
+                {
+                    event: 'helloPressed',
+                    label: 'Hello World!'
+                },
+                {
+                    event: 'testPressed',
+                    label: 'Test!'
+                }
+            ]
+        }
+    }).addEventListener('sharePressed', function(event) {
         alert(event.url);
-    }).addEventListener('test', function(event) {
+    }).addEventListener('helloPressed', function(event) {
+        alert(event.url);
+    }).addEventListener('testPressed', function(event) {
         alert(event.url);
     });
 
 Two properties from InAppBrowser are disabled.
 + `location` is always `false` because address bar is not needed for an immersive experience of an integrated browser.
++ `toolbar` is redefined to contain toolbar settings and toolbar is always shown, because the whole point why you are using this plugin is to style toolbar right?
 + `toolbarposition` is always `top` to remain consistent across platforms.
 
 License
